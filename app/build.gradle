@@ -1,0 +1,112 @@
+apply plugin: 'com.android.application'
+//定义时间
+static def releaseTime() {
+    return new Date().format("yyyyMMddHHmm", TimeZone.getTimeZone("GMT+08:00"))
+}
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        applicationId "com.tt.easyble"
+        minSdkVersion 18
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    //签名配置
+    signingConfigs {
+        //签名版本
+        release {
+            //相对于app的根目录的路径
+            File propFile = file('signing.properties');
+            if (propFile.exists()) {
+                def Properties props = new Properties()
+                props.load(new FileInputStream(propFile))
+                if (props.containsKey('STORE_FILE') && props.containsKey('STORE_PASSWORD') &&
+                        props.containsKey('KEY_ALIAS') && props.containsKey('KEY_PASSWORD')) {
+                    storeFile = file(props['STORE_FILE'])
+                    storePassword = props['STORE_PASSWORD']
+                    keyAlias = props['KEY_ALIAS']
+                    keyPassword = props['KEY_PASSWORD']
+                }
+            }
+        }
+        //测试版本，也就是平常跑的版本
+        // 部分第三方SDK要绑定签名, 故使用 release 的签名, 方便测试
+        debug {
+            File propFile = file('signing.properties');
+            if (propFile.exists()) {
+                def Properties props = new Properties()
+                props.load(new FileInputStream(propFile))
+                if (props.containsKey('STORE_FILE') && props.containsKey('STORE_PASSWORD') &&
+                        props.containsKey('KEY_ALIAS') && props.containsKey('KEY_PASSWORD')) {
+                    storeFile = file(props['STORE_FILE'])
+                    storePassword = props['STORE_PASSWORD']
+                    keyAlias = props['KEY_ALIAS']
+                    keyPassword = props['KEY_PASSWORD']
+                }
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            //签名
+            signingConfig signingConfigs.release
+            //显示log，代码里面要做判断
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+        }
+        debug {
+            //设置签名
+            signingConfig signingConfigs.debug
+            //显示log，代码里面要做判断
+            buildConfigField("boolean", "LOG_DEBUG", "true")
+        }
+
+        //打包的名字
+        applicationVariants.all { variant ->
+            variant.outputs.all { output ->
+                def outputFile = output.outputFile
+                def fileName
+                if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                    if (variant.buildType.name.equals('release')) {
+                        fileName = "蓝牙测试_release_v${defaultConfig.versionName}_${releaseTime()}.apk"
+                    } else if (variant.buildType.name.equals('debug')) {
+                        fileName = "蓝牙测试_debug_v${defaultConfig.versionName}${releaseTime()}.apk"
+                    }
+                    outputFileName = fileName
+                }
+            }
+        }
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+
+
+    //ui
+    //butterknife，10.1是androidx，先不要了用，
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    //
+    //权限申请，
+    implementation 'com.yanzhenjie.permission:support:2.0.1'
+    //日记
+    implementation 'com.orhanobut:logger:2.2.0'
+}
