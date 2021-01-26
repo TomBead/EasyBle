@@ -5,7 +5,9 @@ import android.os.Handler;
 
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
+import com.tt.easyble.ble.BleCharacteristic;
 import com.tt.easyble.ble.BleManger;
+import com.tt.easyble.sample.box.BleUUUID;
 
 
 /**
@@ -16,6 +18,9 @@ public class MyApplication extends Application {
     private static MyApplication instance;
 
     Handler handler;
+
+    public static String devMac = "";
+    public static String devName = "";
 
     //单例模式中获取唯一的MyApplication实例
     public static MyApplication getInstance() {
@@ -41,6 +46,12 @@ public class MyApplication extends Application {
     private void intiBle() {
         if (BleManger.INATAN.isSupperBle()) {
             BleManger.INATAN.init();
+            //添加特征值
+            BleCharacteristic characteristic = new BleCharacteristic();
+            characteristic.setServiceUUID(BleUUUID.serviceUUUID);
+            characteristic.setNotifyUUUID(BleUUUID.notifyUUUID);
+            characteristic.setWriteUUUID(BleUUUID.writeUUUID);
+            BleManger.INATAN.addBleCharacteristic(characteristic);
         }
     }
 

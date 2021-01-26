@@ -4,50 +4,80 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#fff"
     android:orientation="vertical"
+    android:padding="@dimen/dp_16"
     tools:context=".sample.MainActivity">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
 
-        <Button
-            android:id="@+id/main_clean_log"
-            android:layout_width="80dp"
-            android:layout_height="48dp"
-            android:layout_gravity="right"
-            android:text="清空" />
-    </FrameLayout>
-
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:background="@android:color/white"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/main_log_tv"
-                android:layout_width="match_parent"
+                android:id="@+id/main_dev_name"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="" />
+                android:text="name"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/main_dev_mac"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="mac"
+                android:textSize="18sp" />
+
         </LinearLayout>
-    </ScrollView>
+
+        <TextView
+            android:id="@+id/main_connect_state"
+            android:layout_width="@dimen/dp_80"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="断开"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/main_log_rv"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="#ccc"
+        android:overScrollMode="never"
+        android:scrollbars="none" />
+
 
     <Button
-        android:id="@+id/main_connect"
+        android:id="@+id/main_clean_back"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="直接连接" />
+        android:text="清空返回" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/main_ed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="60dp" />
+    </LinearLayout>
 
     <Button
-        android:id="@+id/main_scan"
+        android:id="@+id/main_send"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="搜索连接" />
+        android:text="发送消息" />
 </LinearLayout>
