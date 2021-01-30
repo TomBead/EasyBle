@@ -7,6 +7,8 @@ package com.tt.easyble.ble;
 public class BleError {
     //设备没有搜索到
     public static final String BLE_NO_SUPPER = "BLE_NO_SUPPER";
+    //mac地址有错误
+    public static final String BLE_MAC_ERROR = "BLE_MAC_ERROR";
 
     //设备没有搜索到
     public static final String DEV_NO_SCAN = "DEV_NO_SCAN";
@@ -22,8 +24,9 @@ public class BleError {
 
     //主动断开
     public static final String DIS_CONNECT = "DIS_CONNECT";
-
+    //主动断开
+    public static final String CONNECT_ERROR = "CONNECT_ERROR";
     //
-    public static final String WRITR_FAIL = "DIS_CONNECT";
+    public static final String WRITR_FAIL = "WRITR_FAIL";
 
 }

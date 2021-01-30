@@ -14,7 +14,6 @@ import com.orhanobut.logger.Logger;
 import com.tt.easyble.R;
 import com.tt.easyble.ble.BleConnectCallBack;
 import com.tt.easyble.ble.BleManger;
-import com.tt.easyble.ble.EasyLeScanCallback;
 import com.tt.easyble.sample.view.SpacesItemDecoration;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.runtime.Permission;

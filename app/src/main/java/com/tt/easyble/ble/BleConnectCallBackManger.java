@@ -7,7 +7,8 @@ import java.util.HashMap;
 
 
 /**
- * 管理数据分发，可能同一时间连接的不止一个设备
+ * 管理数据分发，
+ * 可能多个界面用同一个返回的数据，所以要多个监听都能收到
  */
 class BleConnectCallBackManger {
 
@@ -25,16 +26,20 @@ class BleConnectCallBackManger {
         BleConnectCallBackHashMap.remove(connectCallBack.getName());
     }
 
+    void removeBleConnectCallBack(String callbackName) {
+        BleConnectCallBackHashMap.remove(callbackName);
+    }
 
     void connectSuccess() {
         for (String key : BleConnectCallBackHashMap.keySet()) {
+            Logger.d("=====connectSuccess key==" + key);
             BleConnectCallBackHashMap.get(key).connectSuccess();
         }
     }
 
     void connectFail(String errorMsg) {
         for (String key : BleConnectCallBackHashMap.keySet()) {
-            Logger.d("=====connectFail key==" + key);
+            Logger.d("=====connectFail key==" + key + " " + errorMsg);
             BleConnectCallBackHashMap.get(key).connectFail(errorMsg);
         }
     }

@@ -44,7 +44,7 @@ public class MyApplication extends Application {
     }
 
     private void intiBle() {
-        if (BleManger.INATAN.isSupperBle()) {
+        if (BleManger.INATAN.isSupperBle(this)) {
             BleManger.INATAN.init();
             //添加特征值
             BleCharacteristic characteristic = new BleCharacteristic();
@@ -52,6 +52,8 @@ public class MyApplication extends Application {
             characteristic.setNotifyUUUID(BleUUUID.notifyUUUID);
             characteristic.setWriteUUUID(BleUUUID.writeUUUID);
             BleManger.INATAN.addBleCharacteristic(characteristic);
+            //设置后台扫描蓝牙
+            BleManger.INATAN.setScanBackstage(true);
         }
     }
 

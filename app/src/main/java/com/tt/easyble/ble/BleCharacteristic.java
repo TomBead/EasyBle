@@ -11,7 +11,7 @@ public class BleCharacteristic {
     private String writeUUUID;
 
 
-    public String getServiceUUID() {
+    String getServiceUUID() {
         return serviceUUID;
     }
 
@@ -19,7 +19,7 @@ public class BleCharacteristic {
         this.serviceUUID = serviceUUID;
     }
 
-    public String getNotifyUUUID() {
+    String getNotifyUUUID() {
         return notifyUUUID;
     }
 
@@ -27,7 +27,7 @@ public class BleCharacteristic {
         this.notifyUUUID = notifyUUUID;
     }
 
-    public String getWriteUUUID() {
+    String getWriteUUUID() {
         return writeUUUID;
     }
 

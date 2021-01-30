@@ -157,6 +157,16 @@ public class A1LockHandler {
                 .startSend("AddMPermisson", data);
     }
 
+
+    /**
+     *
+     */
+    void addCard() {
+
+    }
+
+
+
     public static void setMac(String mac) {
         devMac = mac;
     }

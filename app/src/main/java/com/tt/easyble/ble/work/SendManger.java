@@ -9,6 +9,8 @@ import java.util.HashMap;
 
 /**
  * 处理回调和接受不在一个地方的问题，
+ *
+ *
  */
 public enum SendManger {
     INATAN;

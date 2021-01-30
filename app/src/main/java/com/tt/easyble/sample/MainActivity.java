@@ -12,9 +12,10 @@ import com.tt.easyble.R;
 import com.tt.easyble.ble.BleConnectCallBack;
 import com.tt.easyble.ble.BleManger;
 import com.tt.easyble.ble.HexUtils;
-import com.tt.easyble.sample.a1.A1LockHandler;
 import com.tt.easyble.sample.a1.A1MsgBuilder;
 import com.tt.easyble.sample.view.SpacesItemDecoration;
+import com.yanzhenjie.permission.AndPermission;
+import com.yanzhenjie.permission.runtime.Permission;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,7 @@ public class MainActivity extends BaseActivity {
     @Override
     public void inti() {
         super.inti();
+        requestPermission();
         setBle();
         MyApplication.devMac = "DE:5F:50:E6:FE:D0";
         mainDevName.setText(MyApplication.devName);
@@ -71,6 +73,28 @@ public class MainActivity extends BaseActivity {
         setRv();
     }
 
+    /**
+     * 定位权限是蓝牙ble扫描需要
+     */
+    private void requestPermission() {
+        String[] permission = new String[]{Permission.ACCESS_FINE_LOCATION};
+
+        AndPermission.with(this)
+                .runtime()
+                .permission(permission)
+                .onGranted(permissions -> {
+                    Logger.d("==========获取权限成功");
+
+                    byte[] data = HexUtils.hexStr2Bytes(A1MsgBuilder.AddMPermisson("135477"));
+                    BleManger.INATAN.postData(MyApplication.devMac, data);
+                })
+                .onDenied(permissions -> {
+                    Logger.d("==========获取权限失败");
+                })
+                .start();
+        Logger.d("==========请求权限");
+    }
+
     //点击监听
     @OnClick({R.id.main_clean_back, R.id.main_send, R.id.main_connect_state})
     public void onViewClicked(View v) {
@@ -80,12 +104,15 @@ public class MainActivity extends BaseActivity {
                 break;
             case R.id.main_send:
 //                sendMsg();
-                A1LockHandler.setMac(MyApplication.devMac);
-                A1LockHandler.addLock();
+//                A1LockHandler.setMac(MyApplication.devMac);
+//                A1LockHandler.addLock();
+                byte[] data = HexUtils.hexStr2Bytes(A1MsgBuilder.AddMPermisson("135477"));
+                BleManger.INATAN.postData(MyApplication.devMac, data);
                 break;
             case R.id.main_connect_state:
-                connectDev();
-                break;
+//                connectDev();
+                BleManger.INATAN.disConnectByCode();
+//                break;
             default:
                 break;
         }
@@ -126,7 +153,7 @@ public class MainActivity extends BaseActivity {
 
 
     void setBle() {
-        bleConnectCallBack = new BleConnectCallBack(MyApplication.devMac) {
+        bleConnectCallBack = new BleConnectCallBack("main") {
             @Override
             public void connectSuccess() {
                 super.connectSuccess();
@@ -137,6 +164,14 @@ public class MainActivity extends BaseActivity {
             public void connectFail(String errorMsg) {
                 Logger.d("============= Thread ==" + Thread.currentThread().getName());
                 mainConnectState.setText("断开");
+                //
+                mainSend.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        byte[] data = HexUtils.hexStr2Bytes(A1MsgBuilder.AddMPermisson("135477"));
+                        BleManger.INATAN.postData(MyApplication.devMac, data);
+                    }
+                }, 4000);
             }
 
             @Override
@@ -148,7 +183,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void handleMsg(String hexString, byte[] bytes) {
                 addLog(hexString);
-                //
+                BleManger.INATAN.disConnectByCode();
             }
 
             @Override
