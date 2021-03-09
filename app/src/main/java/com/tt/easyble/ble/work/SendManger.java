@@ -1,7 +1,8 @@
 package com.tt.easyble.ble.work;
 
 
-import com.orhanobut.logger.Logger;
+import android.util.Log;
+
 import com.tt.easyble.ble.BleConnectCallBack;
 import com.tt.easyble.ble.BleManger;
 
@@ -9,11 +10,11 @@ import java.util.HashMap;
 
 /**
  * 处理回调和接受不在一个地方的问题，
- *
- *
  */
 public enum SendManger {
     INATAN;
+
+    private String TAG = "SendManger";
     //
     private static HashMap<String, MsgCallBack> msgCallBackHashMap = new HashMap<>();
     //列表，按顺序执行
@@ -105,12 +106,12 @@ public enum SendManger {
         if (msgCallBackHashMap.containsKey(currWork)) {
             MsgCallBack msgCallBack = msgCallBackHashMap.get(currWork);
             if (msgCallBack == null) {
-                Logger.d("==========currWork " + currWork + "callback null");
+                Log.d(TAG, "==========currWork " + currWork + "callback null");
                 return;
             }
             msgCallBack.callback(currWork, data, hexString);
         } else {
-            Logger.d("==========currWork " + currWork + "no key");
+            Log.d(TAG, "==========currWork " + currWork + "no key");
         }
     }
 

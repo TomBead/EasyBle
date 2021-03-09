@@ -9,6 +9,7 @@ public class BleCharacteristic {
     private String serviceUUID;
     private String notifyUUUID;
     private String writeUUUID;
+    private String descriptor;
 
 
     String getServiceUUID() {
@@ -33,5 +34,13 @@ public class BleCharacteristic {
 
     public void setWriteUUUID(String writeUUUID) {
         this.writeUUUID = writeUUUID;
+    }
+
+    public String getDescriptor() {
+        return descriptor;
+    }
+
+    public void setDescriptor(String descriptor) {
+        this.descriptor = descriptor;
     }
 }

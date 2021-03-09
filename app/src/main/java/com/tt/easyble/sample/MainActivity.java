@@ -1,5 +1,7 @@
 package com.tt.easyble.sample;
 
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -52,6 +54,9 @@ public class MainActivity extends BaseActivity {
 
     LogAdapter logAdapter;
 
+    private MutableLiveData<String> mLiveData;
+
+
     @Override
     public int getLayoutResID() {
         return R.layout.activity_main;
@@ -71,6 +76,16 @@ public class MainActivity extends BaseActivity {
             mainConnectState.setText("断开");
         }
         setRv();
+
+
+        //liveData基本使用
+        mLiveData = new MutableLiveData<>();
+        mLiveData.observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+
+            }
+        });
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.tt.easyble.ble;
 
 
+import android.Manifest;
+import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -18,11 +20,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.content.ContextCompat;
-
-import com.orhanobut.logger.Logger;
-import com.tt.easyble.sample.MyApplication;
-import com.tt.easyble.sample.box.BleUUUID;
-import com.yanzhenjie.permission.runtime.Permission;
+import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -55,7 +53,6 @@ public enum BleManger {
     private static BluetoothGattCharacteristic writeCharacteristic;
     //标记mac地址，如果已经扫描到可以直连
     //如果长时间没有搜索到就做一个移除
-    //
     private static final int INTI_CACHE_COUNT = 200;
     private HashMap<String, Integer> cacheDeviceMap = new HashMap<>();
     //
@@ -81,8 +78,8 @@ public enum BleManger {
      * applicttion 里面使用
      * 用build模式把参数设置进来，
      */
-    public void init() {
-        context = MyApplication.getInstance();
+    public void init(Application application) {
+        context = application;
         initBleAdapter();
         registBleListen();
         callBackManger = new BleConnectCallBackManger();
@@ -198,7 +195,7 @@ public enum BleManger {
      */
     private void scanDevice() {
         if (isScan) {
-            Logger.d("========已经在扫描了");
+            log("========已经在扫描了");
             return;
         }
         handler.removeCallbacks(scanRunnable);
@@ -223,7 +220,7 @@ public enum BleManger {
      * 停止扫描
      */
     private void stopScan() {
-        Logger.d("========stopSca 停止扫描");
+        log("========stopSca 停止扫描");
         handler.removeCallbacks(scanRunnable);
         mbluetoothAdapter.stopLeScan(mCallback);
         isScan = false;
@@ -277,8 +274,8 @@ public enum BleManger {
             log("======removeBond " + e.getMessage());
         }
         log("====断开连接   isScan===" + isScan);
-        Logger.d("======disConnect thread" + Thread.currentThread().getName());
-        Logger.d("===========mac  count" + cacheDeviceMap.get(mac));
+        log("======disConnect thread" + Thread.currentThread().getName());
+        log("===========mac  count" + cacheDeviceMap.get(mac));
     }
 
 
@@ -300,16 +297,16 @@ public enum BleManger {
             //连接成功，发送成功，然后突然返回22，断开，，然后重试又连接成功，会重复发两次
             //status=22且，newState==0，后面还会断开，所以这个要拿出来处理
             if (status == 22 && newState == 0) {
-                Logger.d("=======222222,,不处理" + mac);
+                log("=======222222,,不处理" + mac);
                 return;
             }
-            Logger.d("=======已经连接" + mac);
+            log("=======已经连接" + mac);
 
             //连接成功
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 //
 //                if (isConnect) {
-//                    Logger.d("=======已经连接" + mac);
+//                    log("=======已经连接" + mac);
 //                    handler.post(new Runnable() {
 //                        @Override
 //                        public void run() {
@@ -328,7 +325,7 @@ public enum BleManger {
                         }
                         //在还没有连接成功就断开，可能会出现这种情况
                         else {
-                            Logger.d("=======mBluetoothGatt == null？？");
+                            log("=======mBluetoothGatt == null？？");
                             callBackManger.connectFail(BleError.GATT_NULL);
                         }
                     }
@@ -337,12 +334,12 @@ public enum BleManger {
             //连接失败，，
             // 要考虑自动断开的时候不重连
             else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Logger.d("======蓝牙断开onConnectionStateChange :status==" + status + " newState== " + newState);
-                Logger.d("======retryCount==" + retryCount + "  needConnect  " + needConnect);
+                log("======蓝牙断开onConnectionStateChange :status==" + status + " newState== " + newState);
+                log("======retryCount==" + retryCount + "  needConnect  " + needConnect);
                 isConnect = false;
                 //连接失败重连，，
                 if (needConnect && (retryCount < MAX_RETRY_COUNT)) {
-                    Logger.d("=======重连 retryCount==" + retryCount);
+                    log("=======重连 retryCount==" + retryCount);
                     retryCount++;
                     //断开重连
                     if (mBluetoothGatt != null) {
@@ -350,16 +347,16 @@ public enum BleManger {
                         mBluetoothGatt.close();
                         mBluetoothGatt = null;
                     }
-                    Logger.d("=======mBluetoothGatt 重新连接");
+                    log("=======mBluetoothGatt 重新连接");
                     mBluetoothGatt = device.connectGatt(context, false, mGattCallback);
                 } else {
-                    Logger.d("=======连接断开,不重连");
+                    log("=======连接断开,不重连");
                     disConnect();
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Logger.d("=======连接断开,callBackManger");
-                            Logger.d("===== Thread ==" + Thread.currentThread().getName());
+                            log("=======连接断开,callBackManger");
+                            log("===== Thread ==" + Thread.currentThread().getName());
                             callBackManger.connectFail(BleError.CONNECT_ERROR);
                         }
                     });
@@ -367,7 +364,7 @@ public enum BleManger {
             }
             //其他
             else {
-                Logger.d("=======other status" + status + "newState===" + newState);
+                log("=======other status" + status + "newState===" + newState);
             }
         }
 
@@ -376,10 +373,14 @@ public enum BleManger {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 BluetoothGattCharacteristic notifyCharacteristic = null;
                 List<BluetoothGattService> services = mBluetoothGatt.getServices();
+
+                BleCharacteristic currBleCharacteristic = null;
                 //遍历所有服务，，
                 for (BluetoothGattService bluetoothGattService : services) {
                     for (BleCharacteristic mCharacteristic : bleCharacteristics) {
                         if (bluetoothGattService.getUuid().toString().equals(mCharacteristic.getServiceUUID())) {
+                            //搞个引用
+                            currBleCharacteristic = mCharacteristic;
                             //找通知管道
                             notifyCharacteristic = bluetoothGattService.getCharacteristic(UUID.fromString(mCharacteristic.getNotifyUUUID()));
                             //找写管道
@@ -399,7 +400,7 @@ public enum BleManger {
                 }
 
                 //打开通知，，
-                boolean isenable = enableNotification(notifyCharacteristic, true);
+                boolean isenable = enableNotification(notifyCharacteristic, true, currBleCharacteristic.getDescriptor());
                 if (isenable) {
                     log("=====打开通知成功");
                     //这里要延时，，否则发送太快会失败，
@@ -425,9 +426,9 @@ public enum BleManger {
         }
 
         @Override //手机接收到数据回调此接口
-        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+        public void onCharacteristicChanged(BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
             if (gatt.getDevice().getAddress().equals(mac)) {
-                String hexString = bytes2HexStr(characteristic.getValue());
+                final String hexString = bytes2HexStr(characteristic.getValue());
                 log("==========指令返回" + hexString);
                 handler.removeCallbacks(timeOutRunnable);
                 handler.post(new Runnable() {
@@ -449,14 +450,18 @@ public enum BleManger {
     /**
      * 打开通知
      */
-    private boolean enableNotification(BluetoothGattCharacteristic characteristic, boolean enable) {
+    private boolean enableNotification(BluetoothGattCharacteristic characteristic, boolean enable, String descriptor) {
         if (mBluetoothGatt == null || characteristic == null) {
             return false;
         }
         if (!mBluetoothGatt.setCharacteristicNotification(characteristic, enable)) {
             return false;
         }
-        BluetoothGattDescriptor clientConfig = characteristic.getDescriptor(UUID.fromString(BleUUUID.descriptor));
+        if (descriptor == null) {
+            return false;
+        }
+
+        BluetoothGattDescriptor clientConfig = characteristic.getDescriptor(UUID.fromString(descriptor));
         if (clientConfig == null) {
             return false;
         }
@@ -474,7 +479,7 @@ public enum BleManger {
      * 1.先去连接，然后发送
      * 2.发送完成取消掉连接
      */
-    public void postData(String address, byte[] data) {
+    public void postData(final String address, final byte[] data) {
         if (mbluetoothAdapter == null) {
             log("==========不支持蓝牙");
             callBackManger.connectFail(BleError.BLE_NO_SUPPER);
@@ -529,7 +534,7 @@ public enum BleManger {
         writeCharacteristic.setValue(data);
         boolean isWriteSuccess = mBluetoothGatt.writeCharacteristic(writeCharacteristic);
         if (!isWriteSuccess) {
-            Logger.d("======写数据失败");
+            log("======写数据失败");
             //提示失败
             callBackManger.sendFail(BleError.WRITR_FAIL);
         }
@@ -548,7 +553,7 @@ public enum BleManger {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    callBackManger.connectTimeOut();
+                    callBackManger.writeTimeOut();
                 }
             });
         }
@@ -583,7 +588,7 @@ public enum BleManger {
                     //开启中
                     break;
                 case BluetoothAdapter.STATE_ON:
-                    Logger.d("=========蓝牙打开");
+                    log("=========蓝牙打开");
                     if (bleStateListen != null) {
                         bleStateListen.onOpen();
                     }
@@ -594,7 +599,7 @@ public enum BleManger {
                     break;
                 case BluetoothAdapter.STATE_OFF:
                     // 关闭
-                    Logger.d("=========蓝牙关闭");
+                    log("=========蓝牙关闭");
                     if (bleStateListen != null) {
                         bleStateListen.onClose();
                     }
@@ -707,7 +712,7 @@ public enum BleManger {
 //                log("======" + item.getKey() + " " + (count - 1));
                 cacheDeviceMap.put(item.getKey(), count - 1);
             } else {
-//                Logger.d("====== 移除" + item.getKey());
+//                log("====== 移除" + item.getKey());
                 it.remove();
                 cacheDeviceMap.remove(item.getKey());
 
@@ -723,7 +728,8 @@ public enum BleManger {
      * 判断是否有权限，返回true就是有权限
      */
     private boolean lacksPermission() {
-        return ContextCompat.checkSelfPermission(context, Permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED;
+        String permission = Manifest.permission.ACCESS_FINE_LOCATION;
+        return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED;
     }
 
     protected boolean checkBle() {
@@ -770,7 +776,7 @@ public enum BleManger {
 
     void log(String log) {
         long time = System.currentTimeMillis() - startTime;
-        Logger.d(log + " time==" + time);
+        Log.d("BleManger", log + " time==" + time);
     }
 
 }

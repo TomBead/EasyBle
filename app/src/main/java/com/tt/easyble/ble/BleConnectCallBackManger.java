@@ -1,7 +1,7 @@
 package com.tt.easyble.ble;
 
 
-import com.orhanobut.logger.Logger;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -11,6 +11,7 @@ import java.util.HashMap;
  * 可能多个界面用同一个返回的数据，所以要多个监听都能收到
  */
 class BleConnectCallBackManger {
+    private String TAG = "BleConnectCallBackManger";
 
 
     private HashMap<String, BleConnectCallBack> BleConnectCallBackHashMap = new HashMap<>();
@@ -32,19 +33,19 @@ class BleConnectCallBackManger {
 
     void connectSuccess() {
         for (String key : BleConnectCallBackHashMap.keySet()) {
-            Logger.d("=====connectSuccess key==" + key);
+            Log.d(TAG, "=====connectSuccess key==" + key);
             BleConnectCallBackHashMap.get(key).connectSuccess();
         }
     }
 
     void connectFail(String errorMsg) {
         for (String key : BleConnectCallBackHashMap.keySet()) {
-            Logger.d("=====connectFail key==" + key + " " + errorMsg);
+            Log.d(TAG, "=====connectFail key==" + key + " " + errorMsg);
             BleConnectCallBackHashMap.get(key).connectFail(errorMsg);
         }
     }
 
-    void connectTimeOut() {
+    void writeTimeOut() {
         for (String key : BleConnectCallBackHashMap.keySet()) {
             BleConnectCallBackHashMap.get(key).writeTimeOut();
         }

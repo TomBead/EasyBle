@@ -38,14 +38,13 @@ public class MyApplication extends Application {
         intiLog();
         //主线程handle
         handler = new Handler(getMainLooper());
-
         //
         intiBle();
     }
 
     private void intiBle() {
         if (BleManger.INATAN.isSupperBle(this)) {
-            BleManger.INATAN.init();
+            BleManger.INATAN.init(this);
             //添加特征值
             BleCharacteristic characteristic = new BleCharacteristic();
             characteristic.setServiceUUID(BleUUUID.serviceUUUID);

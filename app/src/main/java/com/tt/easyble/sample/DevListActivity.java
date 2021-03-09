@@ -1,5 +1,6 @@
 package com.tt.easyble.sample;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Handler;
@@ -122,9 +123,9 @@ public class DevListActivity extends BaseActivity {
         }
     }
 
-    private EasyLeScanCallback easyLeScanCallback = new EasyLeScanCallback() {
+    private BluetoothAdapter.LeScanCallback easyLeScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
-        public void onBleScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             isBleScan = true;
             if (device.getName() == null) {
                 return;
@@ -133,11 +134,6 @@ public class DevListActivity extends BaseActivity {
                 deviceList.add(device);
                 bleDeviceAdapter.setNewData(deviceList);
             }
-        }
-
-        @Override
-        public void stopScan() {
-            Logger.d("======搜索停止？");
         }
     };
 
