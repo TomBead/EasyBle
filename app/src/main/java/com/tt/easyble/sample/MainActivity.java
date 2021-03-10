@@ -177,7 +177,6 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void connectFail(String errorMsg) {
-                Logger.d("============= Thread ==" + Thread.currentThread().getName());
                 mainConnectState.setText("断开");
                 //
                 mainSend.postDelayed(new Runnable() {
@@ -191,7 +190,6 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void writeTimeOut() {
-                Logger.d("============= Thread ==" + Thread.currentThread().getName());
                 addLog("发送超时");
             }
 

@@ -10,11 +10,17 @@ public class BleError {
     //mac地址有错误
     public static final String BLE_MAC_ERROR = "BLE_MAC_ERROR";
 
+    //mac地址有错误
+    public static final String DEV_MAC_NULL = "DEV_MAC_NULL";
+
     //设备没有搜索到
     public static final String DEV_NO_SCAN = "DEV_NO_SCAN";
 
     //设备没有连接上
     public static final String DEV_NO_CONNECT = "DEV_NO_CONNECT";
+
+    //
+    public static final String DEV_NULL = "DEV_NULL";
 
     //
     public static final String GATT_NULL = "GATT_NULL";
