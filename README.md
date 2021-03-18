@@ -1,11 +1,12 @@
 
 
 ## 可能是最简单的蓝牙ble框架，适合初学者学习
-### <font color=FF0000>可以先看sample下面大代码</font>
+<font color=FF0000>可以先看sample下面的代码</font>
 ### 联系我：wx：yuewater666
 
 ## 快速使用
 ### 1.初始化蓝牙
+
     private void intiBle() {
         if (BleManger.INATAN.isSupperBle(this)) {
             //初始化蓝牙
@@ -24,6 +25,7 @@
 
 
 ### 2.添加蓝牙回调
+
         bleConnectCallBack = new BleConnectCallBack("main") {
             @Override
             public void connectSuccess() {
@@ -54,5 +56,7 @@
         BleManger.INATAN.addBleConnectCallBack(bleConnectCallBack);
 
 ### 3.发送数据
-   byte[] data = HexUtils.hexStr2Bytes(str);
-   BleManger.INATAN.sendData(data);
+
+    byte[] data = HexUtils.hexStr2Bytes(str);
+    BleManger.INATAN.sendData(data);
+
