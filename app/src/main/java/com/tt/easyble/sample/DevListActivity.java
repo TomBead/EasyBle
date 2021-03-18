@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -15,7 +16,6 @@ import com.orhanobut.logger.Logger;
 import com.tt.easyble.R;
 import com.tt.easyble.ble.BleConnectCallBack;
 import com.tt.easyble.ble.BleManger;
-import com.tt.easyble.sample.view.SpacesItemDecoration;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.runtime.Permission;
 
@@ -26,7 +26,7 @@ import butterknife.BindView;
 
 
 /**
- * https://blog.csdn.net/laoguanhua/article/details/81385270
+ *
  */
 public class DevListActivity extends BaseActivity {
 
@@ -41,8 +41,15 @@ public class DevListActivity extends BaseActivity {
 
 
     @Override
+    public int getLayoutResID() {
+        return R.layout.activity_dev_list;
+    }
+
+    @Override
     public void inti() {
         super.inti();
+        checkIsBle();
+
         requestPermission();
         //
         setRv();
@@ -51,14 +58,23 @@ public class DevListActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        checkBle();
         deviceList.clear();
         bleDeviceAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public int getLayoutResID() {
-        return R.layout.activity_dev_list;
+    protected void onStop() {
+        super.onStop();
+        isBleScan = false;
     }
+
+    private void checkIsBle() {
+        if (!BleManger.INATAN.isSupperBle(this)) {
+            showTipsDialog("手机不支持蓝牙ble");
+        }
+    }
+
 
     /**
      *
@@ -67,7 +83,7 @@ public class DevListActivity extends BaseActivity {
         bleDeviceAdapter = new BleDeviceAdapter(this, null);
         final LinearLayoutManager manager = new LinearLayoutManager(this);
         devListRv.setLayoutManager(manager);
-        devListRv.addItemDecoration(new SpacesItemDecoration(10));
+        devListRv.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         devListRv.setAdapter(bleDeviceAdapter);
 
 
@@ -76,12 +92,13 @@ public class DevListActivity extends BaseActivity {
             public void onSimpleItemChildClick(BaseQuickAdapter adapter, View view, int position) {
                 showLoadingDialog("连接中...");
                 String mac = deviceList.get(position).getAddress();
-                MyApplication.devMac = mac;
-                MyApplication.devName = deviceList.get(position).getName();
                 BleManger.INATAN.connectDevice(mac, new BleConnectCallBack(mac) {
                     @Override
                     public void connectSuccess() {
                         stopLoading();
+                        MyApplication.devName = deviceList.get(position).getName();
+                        MyApplication.devMac = mac;
+                        isBleScan = false;
                         BleManger.INATAN.stopScan(easyLeScanCallback);
                         startActivity(new Intent(DevListActivity.this, MainActivity.class));
                     }
@@ -109,6 +126,7 @@ public class DevListActivity extends BaseActivity {
 
     /**
      * 解决30s只能扫6次的问题，自动重启扫描
+     * https://blog.csdn.net/laoguanhua/article/details/81385270
      */
     private boolean isBleScan = false;
 

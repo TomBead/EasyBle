@@ -1,13 +1,12 @@
 package com.tt.easyble.sample;
 
 import android.app.Application;
-import android.os.Handler;
 
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 import com.tt.easyble.ble.BleCharacteristic;
 import com.tt.easyble.ble.BleManger;
-import com.tt.easyble.sample.box.BleUUUID;
+import com.tt.easyble.ble.BleUUUID;
 
 
 /**
@@ -17,28 +16,20 @@ public class MyApplication extends Application {
 
     private static MyApplication instance;
 
-    Handler handler;
 
     public static String devMac = "";
     public static String devName = "";
 
-    //单例模式中获取唯一的MyApplication实例
     public static MyApplication getInstance() {
         return instance;
     }
 
-    public Handler getHandler() {
-        return handler;
-    }
 
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
         intiLog();
-        //主线程handle
-        handler = new Handler(getMainLooper());
-        //
         intiBle();
     }
 
@@ -53,6 +44,8 @@ public class MyApplication extends Application {
             BleManger.INATAN.addBleCharacteristic(characteristic);
             //设置后台扫描蓝牙
             BleManger.INATAN.setScanBackstage(true);
+        } else {
+            Logger.d("=========手机不支持蓝牙");
         }
     }
 

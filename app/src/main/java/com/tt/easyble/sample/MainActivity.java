@@ -1,7 +1,5 @@
 package com.tt.easyble.sample;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -14,10 +12,7 @@ import com.tt.easyble.R;
 import com.tt.easyble.ble.BleConnectCallBack;
 import com.tt.easyble.ble.BleManger;
 import com.tt.easyble.ble.HexUtils;
-import com.tt.easyble.sample.a1.A1MsgBuilder;
-import com.tt.easyble.sample.view.SpacesItemDecoration;
-import com.yanzhenjie.permission.AndPermission;
-import com.yanzhenjie.permission.runtime.Permission;
+import com.tt.easyble.ble.work.SendManger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +21,7 @@ import butterknife.BindView;
 import butterknife.OnClick;
 
 
-/**
- * https://blog.csdn.net/laoguanhua/article/details/81385270
- */
 public class MainActivity extends BaseActivity {
-
 
     @BindView(R.id.main_dev_name)
     TextView mainDevName;
@@ -46,15 +37,13 @@ public class MainActivity extends BaseActivity {
     EditText mainEd;
     @BindView(R.id.main_send)
     Button mainSend;
-
+    @BindView(R.id.main_disconnect)
+    Button mainDisconnect;
 
     //
     BleConnectCallBack bleConnectCallBack;
     List<String> stringList = new ArrayList<>();
-
     LogAdapter logAdapter;
-
-    private MutableLiveData<String> mLiveData;
 
 
     @Override
@@ -65,9 +54,13 @@ public class MainActivity extends BaseActivity {
     @Override
     public void inti() {
         super.inti();
-        requestPermission();
         setBle();
-        MyApplication.devMac = "DE:5F:50:E6:FE:D0";
+        setRv();
+
+        String msg = "f1040631333534373705";
+        mainEd.setText(msg);
+        //
+//        MyApplication.devMac = "";
         mainDevName.setText(MyApplication.devName);
         mainDevMac.setText(MyApplication.devMac);
         if (BleManger.INATAN.isConnect()) {
@@ -75,74 +68,31 @@ public class MainActivity extends BaseActivity {
         } else {
             mainConnectState.setText("断开");
         }
-        setRv();
-
-
-        //liveData基本使用
-        mLiveData = new MutableLiveData<>();
-        mLiveData.observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-
-            }
-        });
     }
 
-    /**
-     * 定位权限是蓝牙ble扫描需要
-     */
-    private void requestPermission() {
-        String[] permission = new String[]{Permission.ACCESS_FINE_LOCATION};
-
-        AndPermission.with(this)
-                .runtime()
-                .permission(permission)
-                .onGranted(permissions -> {
-                    Logger.d("==========获取权限成功");
-
-                    byte[] data = HexUtils.hexStr2Bytes(A1MsgBuilder.AddMPermisson("135477"));
-                    BleManger.INATAN.postData(MyApplication.devMac, data);
-                })
-                .onDenied(permissions -> {
-                    Logger.d("==========获取权限失败");
-                })
-                .start();
-        Logger.d("==========请求权限");
-    }
 
     //点击监听
-    @OnClick({R.id.main_clean_back, R.id.main_send, R.id.main_connect_state})
+    @OnClick({R.id.main_clean_back, R.id.main_send, R.id.main_disconnect})
     public void onViewClicked(View v) {
         switch (v.getId()) {
             case R.id.main_clean_back:
                 cleanLog();
                 break;
             case R.id.main_send:
-//                sendMsg();
-//                A1LockHandler.setMac(MyApplication.devMac);
-//                A1LockHandler.addLock();
-                byte[] data = HexUtils.hexStr2Bytes(A1MsgBuilder.AddMPermisson("135477"));
-                BleManger.INATAN.postData(MyApplication.devMac, data);
+                sendMsg();
                 break;
-            case R.id.main_connect_state:
-//                connectDev();
+            case R.id.main_disconnect:
                 BleManger.INATAN.disConnectByCode();
-//                break;
+                break;
             default:
                 break;
         }
     }
 
-    private void connectDev() {
-        BleManger.INATAN.connectDevice(MyApplication.devMac, bleConnectCallBack);
-    }
-
-
     void setRv() {
         logAdapter = new LogAdapter(this, stringList);
         final LinearLayoutManager manager = new LinearLayoutManager(this);
         mainLogRv.setLayoutManager(manager);
-        mainLogRv.addItemDecoration(new SpacesItemDecoration(10));
         mainLogRv.setAdapter(logAdapter);
     }
 
@@ -150,22 +100,8 @@ public class MainActivity extends BaseActivity {
     void sendMsg() {
         String str = mainEd.getText().toString().trim();
         byte[] data = HexUtils.hexStr2Bytes(str);
-        String cmd = A1MsgBuilder.OpenLock("148410");
-        data = HexUtils.hexStr2Bytes(cmd);
         BleManger.INATAN.sendData(data);
     }
-
-    void cleanLog() {
-        stringList.clear();
-        logAdapter.notifyDataSetChanged();
-    }
-
-    void addLog(String log) {
-        stringList.add(log);
-        Logger.d("=====" + stringList);
-        logAdapter.setNewData(stringList);
-    }
-
 
     void setBle() {
         bleConnectCallBack = new BleConnectCallBack("main") {
@@ -177,15 +113,7 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void connectFail(String errorMsg) {
-                mainConnectState.setText("断开");
-                //
-                mainSend.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        byte[] data = HexUtils.hexStr2Bytes(A1MsgBuilder.AddMPermisson("135477"));
-                        BleManger.INATAN.postData(MyApplication.devMac, data);
-                    }
-                }, 4000);
+                mainConnectState.setText(errorMsg);
             }
 
             @Override
@@ -196,7 +124,6 @@ public class MainActivity extends BaseActivity {
             @Override
             public void handleMsg(String hexString, byte[] bytes) {
                 addLog(hexString);
-                BleManger.INATAN.disConnectByCode();
             }
 
             @Override
@@ -207,9 +134,59 @@ public class MainActivity extends BaseActivity {
         BleManger.INATAN.addBleConnectCallBack(bleConnectCallBack);
     }
 
+    void cleanLog() {
+        stringList.clear();
+        logAdapter.notifyDataSetChanged();
+    }
 
-    void setSend() {
+    void addLog(String log) {
+        stringList.add(log);
+        logAdapter.setNewData(stringList);
+    }
+    //==================================================
 
+    /**
+     * 多条指令串起来可以这么写
+     * 一条发完需要结果再发下一条
+     */
+    public static void startWork() {
+        String msg1 = "AABBCCDD";
+        byte[] data = HexUtils.hexStr2Bytes(msg1);
+        //
+        SendManger.INATAN.inti(MyApplication.devMac)
+                //
+                .listMsg("msg1", new SendManger.MsgCallBack() {
+                    @Override
+                    public void callback(String work, byte[] data, String hexString) {
+                        //模拟逻辑判断
+                        boolean isSuccess = hexString.length() % 2 == 0;
+                        if (isSuccess) {
+                            Logger.d("=======" + work + "成功");
+                            //发送下一条指令。和下面的名字对上
+                            String msg2 = "AABBCCDDEEFF";
+                            byte[] getPwdList = HexUtils.hexStr2Bytes(msg2);
+                            SendManger.INATAN.sendListData("msg2", getPwdList);
+                        } else {
+                            Logger.d("=======" + work + "失败");
+                        }
+                    }
+                })
+                //
+                .listMsg("msg2", new SendManger.MsgCallBack() {
+                    @Override
+                    public void callback(String work, byte[] data, String hexString) {
+                        //模拟逻辑判断
+                        boolean isSuccess = hexString.length() % 2 == 0;
+                        if (isSuccess) {
+                            Logger.d("=======" + work + "成功");
+                        } else {
+                            Logger.d("=======" + work + "失败");
+                        }
+                    }
+                })
+                //...
+                //最后从第一条开始发送
+                .startSend("msg1", data);
     }
 
 }

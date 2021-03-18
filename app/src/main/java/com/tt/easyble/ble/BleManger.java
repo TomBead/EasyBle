@@ -47,7 +47,7 @@ public enum BleManger {
 
     INATAN;
 
-    private Context context;
+    private Application context;
     private static BluetoothAdapter mbluetoothAdapter;
     private static BluetoothGatt mBluetoothGatt;
     //
@@ -55,6 +55,7 @@ public enum BleManger {
     //标记mac地址，如果已经扫描到可以直连
     //如果长时间没有搜索到就做一个移除
     private static final int INTI_CACHE_COUNT = 200;
+    //要一个线程安全的，
     private HashMap<String, Integer> cacheDeviceMap = new HashMap<>();
     //
     private BluetoothDevice device = null;
@@ -216,7 +217,7 @@ public enum BleManger {
     /**
      * 停止扫描计时
      */
-    Runnable scanRunnable = new Runnable() {
+    private Runnable scanRunnable = new Runnable() {
         @Override
         public void run() {
             mbluetoothAdapter.stopLeScan(mCallback);
@@ -243,6 +244,9 @@ public enum BleManger {
     private BluetoothAdapter.LeScanCallback mCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+            if (device.getName() == null) {
+                return;
+            }
             log("====开始扫描" + device.getName() + "===" + device.getAddress());
             //这个有问题，怎么突然变true
             isScan = true;
@@ -291,6 +295,7 @@ public enum BleManger {
 
     /**
      * 和上面不同的是发一个回调
+     * 主动断开
      */
     public void disConnectByCode() {
         disConnect();
@@ -304,7 +309,7 @@ public enum BleManger {
             log("=======onConnectionStateChange==" + status + "  " + newState);
             //返回22的话，连接成功会断开
             //连接成功，发送成功，然后突然返回22，断开，，然后重试又连接成功，会重复发两次
-            //status=22且，newState==0，后面还会断开，所以这个要拿出来处理
+            //status=22且newState==0，后面还会断开，所以这个要拿出来处理
             if (status == 22 && newState == 0) {
                 log("======status == 22 && newState == 0,,不处理");
                 return;
@@ -410,7 +415,7 @@ public enum BleManger {
             //打开通知成功
             if (Arrays.equals(descriptor.getValue(), BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
                     || Arrays.equals(descriptor.getValue(), BluetoothGattDescriptor.ENABLE_INDICATION_VALUE)) {
-                log("==========通知打开");
+                log("==========通知打开成功");
                 connectSuccess();
             }
             //通知改变
@@ -444,7 +449,6 @@ public enum BleManger {
 
 
     private void connectSuccess() {
-        log("=====打开通知成功");
         //这里要延时，，否则发送太快会失败，
         handler.postDelayed(new Runnable() {
             @Override
@@ -498,7 +502,7 @@ public enum BleManger {
 
 
     /***
-     *直接发送
+     *直接发送，可在没链接的情况下调用
      * 1.先去连接，然后发送
      * 2.发送完成取消掉连接
      */
@@ -536,6 +540,7 @@ public enum BleManger {
 
 
     /**
+     * 连接之后再调用
      * byte数组要小于20字节
      */
     public void sendData(byte[] data) {
@@ -557,7 +562,7 @@ public enum BleManger {
         writeCharacteristic.setValue(data);
         boolean isWriteSuccess = mBluetoothGatt.writeCharacteristic(writeCharacteristic);
         if (!isWriteSuccess) {
-            log("======写数据失败");
+            log("====写数据失败");
             //提示失败
             callBackManger.sendFail(BleError.WRITR_FAIL);
         }
@@ -699,7 +704,10 @@ public enum BleManger {
     BluetoothAdapter.LeScanCallback bgCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-//            log("======后台扫描中");
+            if (device.getName() == null) {
+                return;
+            }
+//            log("======后台扫描中" + device.getName());
             isBgScan = true;
             addDeviceToCache(device);
         }
@@ -748,14 +756,10 @@ public enum BleManger {
         }
     }
 
-    /**
-     * 判断是否有权限，返回true就是有权限
-     */
-    private boolean lacksPermission() {
-        String permission = Manifest.permission.ACCESS_FINE_LOCATION;
-        return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED;
-    }
 
+    /**
+     * 判断是否有蓝牙权限
+     */
     protected boolean checkBle() {
         //蓝牙打开
         if (!BleManger.INATAN.isOpenBle()) {
@@ -770,6 +774,14 @@ public enum BleManger {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 判断是否有权限，返回true就是有权限
+     */
+    private boolean lacksPermission() {
+        String permission = Manifest.permission.ACCESS_FINE_LOCATION;
+        return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED;
     }
 
     /**
@@ -800,7 +812,7 @@ public enum BleManger {
 
     void log(String log) {
         long time = System.currentTimeMillis() - startTime;
-        Log.d("BleManger", log + " time==" + time);
+        Log.d("BleManger", " time==" + time + log);
     }
 
 }
