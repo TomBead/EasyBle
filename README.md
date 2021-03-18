@@ -1,16 +1,10 @@
 
 
-##可能是最简单的ble框架，功能如下
-1.搜索列表
-2.连接ble
-3.收发数据
-4.蓝牙开关控制
-5.蓝牙状态广播
+## 可能是最简单的蓝牙ble框架，适合初学者学习
 
 
-
-##快速使用
-1.初始化蓝牙
+## 快速使用
+### 1.初始化蓝牙
     private void intiBle() {
         if (BleManger.INATAN.isSupperBle(this)) {
             //初始化蓝牙
@@ -28,7 +22,7 @@
         }
 
 
-2.添加蓝牙回调
+### 2.添加蓝牙回调
         bleConnectCallBack = new BleConnectCallBack("main") {
             @Override
             public void connectSuccess() {
@@ -58,6 +52,6 @@
         };
         BleManger.INATAN.addBleConnectCallBack(bleConnectCallBack);
 
-3.发送数据
+### 3.发送数据
    byte[] data = HexUtils.hexStr2Bytes(str);
    BleManger.INATAN.sendData(data);
