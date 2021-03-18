@@ -1,6 +1,7 @@
 
 
 ## 可能是最简单的蓝牙ble框架，适合初学者学习
+### <font color=FF0000>可以先看sample下面大代码</font>
 ### 联系我：wx：yuewater666
 
 ## 快速使用
