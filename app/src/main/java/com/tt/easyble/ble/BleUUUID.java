@@ -11,6 +11,4 @@ public class BleUUUID {
     public static final String writeUUUID = "0000fee2-0000-1000-8000-00805f9b34fb";
     //通知
     public static final String notifyUUUID = "0000fee1-0000-1000-8000-00805f9b34fb";
-    //这个也是用来写通知的，，不知道怎么用
-    public static final String descriptor = "00002902-0000-1000-8000-00805f9b34fb";
 }

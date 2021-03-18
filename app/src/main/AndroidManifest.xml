@@ -15,7 +15,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".sample.DevListActivity">
+        <activity android:name=".sample.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <!--        <activity android:name=".sample.DevListActivity" />-->
-        <activity android:name=".sample.MainActivity" />
+        <!--        <activity android:name=".sample.MainActivity" />-->
     </application>
 
 </manifest>

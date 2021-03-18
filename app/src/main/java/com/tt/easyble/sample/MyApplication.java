@@ -35,6 +35,7 @@ public class MyApplication extends Application {
 
     private void intiBle() {
         if (BleManger.INATAN.isSupperBle(this)) {
+            //初始化蓝牙
             BleManger.INATAN.init(this);
             //添加特征值
             BleCharacteristic characteristic = new BleCharacteristic();

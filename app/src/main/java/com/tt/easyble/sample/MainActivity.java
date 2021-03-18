@@ -60,7 +60,7 @@ public class MainActivity extends BaseActivity {
         String msg = "f1040631333534373705";
         mainEd.setText(msg);
         //
-//        MyApplication.devMac = "";
+        MyApplication.devMac = "C7:EA:AF:BE:2F:77";
         mainDevName.setText(MyApplication.devName);
         mainDevMac.setText(MyApplication.devMac);
         if (BleManger.INATAN.isConnect()) {
