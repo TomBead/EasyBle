@@ -19,6 +19,9 @@ public class BleError {
     //设备没有连接上
     public static final String DEV_NO_CONNECT = "DEV_NO_CONNECT";
 
+    //连接超时
+    public static final String DEV_CONNECT_TIMEOUT = "DEV_CONNECT_TIMEOUT";
+
     //
     public static final String DEV_NULL = "DEV_NULL";
 

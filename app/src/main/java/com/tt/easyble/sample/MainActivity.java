@@ -61,6 +61,7 @@ public class MainActivity extends BaseActivity {
         mainEd.setText(msg);
         //
         MyApplication.devMac = "C7:EA:AF:BE:2F:77";
+        MyApplication.devName = "蓝牙设备AA";
         mainDevName.setText(MyApplication.devName);
         mainDevMac.setText(MyApplication.devMac);
         if (BleManger.INATAN.isConnect()) {
@@ -100,7 +101,7 @@ public class MainActivity extends BaseActivity {
     void sendMsg() {
         String str = mainEd.getText().toString().trim();
         byte[] data = HexUtils.hexStr2Bytes(str);
-        BleManger.INATAN.sendData(data);
+        BleManger.INATAN.postData(MyApplication.devMac, data);
     }
 
     void setBle() {
