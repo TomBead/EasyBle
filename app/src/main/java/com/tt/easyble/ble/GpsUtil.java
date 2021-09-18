@@ -32,24 +32,9 @@ public class GpsUtil {
     }
 
     /**
-     * 强制帮用户打开GPS
-     *
-     * @param context
+     * 跳转到gps设置页强制帮用户打开GPS
      */
     private static void openGPS(Activity context) {
-//        Intent GPSIntent = new Intent();
-//        GPSIntent.setClassName("com.android.settings", "com.android.settings.widget.SettingsAppWidgetProvider");
-//        GPSIntent.addCategory("android.intent.category.ALTERNATIVE");
-//        GPSIntent.setData(Uri.parse("custom:3"));
-//        try {
-//            PendingIntent.getBroadcast(context, 0, GPSIntent, 0).send();
-//        } catch (PendingIntent.CanceledException e) {
-//            e.printStackTrace();
-//            Logger.d("==========openGPS error" + e.getMessage());
-//        }
-        //
-
-        //跳转到gps设置页
         Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
         context.startActivityForResult(intent, 1000);
     }

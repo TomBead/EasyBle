@@ -22,6 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!--        <activity android:name=".sample.MainActivity" />-->
         <!--        <activity android:name=".sample.DevListActivity" />-->
         <!--        <activity android:name=".sample.MainActivity" />-->
     </application>

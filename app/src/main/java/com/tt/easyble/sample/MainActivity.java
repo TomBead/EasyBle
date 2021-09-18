@@ -1,5 +1,7 @@
 package com.tt.easyble.sample;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -7,12 +9,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.orhanobut.logger.Logger;
 import com.tt.easyble.R;
-import com.tt.easyble.ble.BleConnectCallBack;
 import com.tt.easyble.ble.BleManger;
-import com.tt.easyble.ble.HexUtils;
-import com.tt.easyble.ble.work.SendManger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,10 +39,9 @@ public class MainActivity extends BaseActivity {
     Button mainDisconnect;
 
     //
-    BleConnectCallBack bleConnectCallBack;
     List<String> stringList = new ArrayList<>();
     LogAdapter logAdapter;
-
+    BleViewModel bleViewModel;
 
     @Override
     public int getLayoutResID() {
@@ -54,14 +51,15 @@ public class MainActivity extends BaseActivity {
     @Override
     public void inti() {
         super.inti();
-        setBle();
+        initViewModel();
+        observeLivaData();
         setRv();
 
         String msg = "f1040631333534373705";
         mainEd.setText(msg);
         //
         MyApplication.devMac = "C7:EA:AF:BE:2F:77";
-        MyApplication.devName = "蓝牙设备AA";
+        MyApplication.devName = "eLock-AAB455D0";
         mainDevName.setText(MyApplication.devName);
         mainDevMac.setText(MyApplication.devMac);
         if (BleManger.INATAN.isConnect()) {
@@ -97,43 +95,38 @@ public class MainActivity extends BaseActivity {
         mainLogRv.setAdapter(logAdapter);
     }
 
+    private void initViewModel() {
+        ViewModelProvider viewModelProvider = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory());
+        bleViewModel = viewModelProvider.get(BleViewModel.class);
+    }
+
+    //观察ViewModel的数据，且此数据 是 View 直接需要的，不需要再做逻辑处理
+    private void observeLivaData() {
+        bleViewModel.getConnectLiveData().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String error) {
+                addLog(error);
+            }
+        });
+
+        bleViewModel.getLoadingLiveData().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                //显示/隐藏加载进度条
+                if (aBoolean) {
+                    showLoadingDialog("");
+                } else {
+                    stopLoading();
+                }
+            }
+        });
+    }
 
     void sendMsg() {
         String str = mainEd.getText().toString().trim();
-        byte[] data = HexUtils.hexStr2Bytes(str);
-        BleManger.INATAN.postData(MyApplication.devMac, data);
+        bleViewModel.startWork(str);
     }
 
-    void setBle() {
-        bleConnectCallBack = new BleConnectCallBack("main") {
-            @Override
-            public void connectSuccess() {
-                super.connectSuccess();
-                mainConnectState.setText("连接");
-            }
-
-            @Override
-            public void connectFail(String errorMsg) {
-                mainConnectState.setText(errorMsg);
-            }
-
-            @Override
-            public void writeTimeOut() {
-                addLog("发送超时");
-            }
-
-            @Override
-            public void handleMsg(String hexString, byte[] bytes) {
-                addLog(hexString);
-            }
-
-            @Override
-            public void sendFail(String errorCode) {
-                addLog(errorCode);
-            }
-        };
-        BleManger.INATAN.addBleConnectCallBack(bleConnectCallBack);
-    }
 
     void cleanLog() {
         stringList.clear();
@@ -144,50 +137,6 @@ public class MainActivity extends BaseActivity {
         stringList.add(log);
         logAdapter.setNewData(stringList);
     }
-    //==================================================
 
-    /**
-     * 多条指令串起来可以这么写
-     * 一条发完需要结果再发下一条
-     */
-    public static void startWork() {
-        String msg1 = "AABBCCDD";
-        byte[] data = HexUtils.hexStr2Bytes(msg1);
-        //
-        SendManger.INATAN.inti(MyApplication.devMac)
-                //
-                .listMsg("msg1", new SendManger.MsgCallBack() {
-                    @Override
-                    public void callback(String work, byte[] data, String hexString) {
-                        //模拟逻辑判断
-                        boolean isSuccess = hexString.length() % 2 == 0;
-                        if (isSuccess) {
-                            Logger.d("=======" + work + "成功");
-                            //发送下一条指令。和下面的名字对上
-                            String msg2 = "AABBCCDDEEFF";
-                            byte[] getPwdList = HexUtils.hexStr2Bytes(msg2);
-                            SendManger.INATAN.sendListData("msg2", getPwdList);
-                        } else {
-                            Logger.d("=======" + work + "失败");
-                        }
-                    }
-                })
-                //
-                .listMsg("msg2", new SendManger.MsgCallBack() {
-                    @Override
-                    public void callback(String work, byte[] data, String hexString) {
-                        //模拟逻辑判断
-                        boolean isSuccess = hexString.length() % 2 == 0;
-                        if (isSuccess) {
-                            Logger.d("=======" + work + "成功");
-                        } else {
-                            Logger.d("=======" + work + "失败");
-                        }
-                    }
-                })
-                //...
-                //最后从第一条开始发送
-                .startSend("msg1", data);
-    }
 
 }

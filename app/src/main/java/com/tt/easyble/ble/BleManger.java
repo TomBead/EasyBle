@@ -128,6 +128,13 @@ public enum BleManger {
     }
 
     /**
+     * 关掉蓝牙
+     */
+    public boolean closeBle() {
+        return mbluetoothAdapter.disable();
+    }
+
+    /**
      * 是否有蓝牙连接，
      */
     public boolean isConnect() {
@@ -177,10 +184,6 @@ public enum BleManger {
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             log("==========mac地址错误");
             callBackManger.connectFail(BleError.BLE_MAC_ERROR);
-            return;
-        }
-        if (address == null) {
-            callBackManger.connectFail(BleError.DEV_MAC_NULL);
             return;
         }
         if (isConnect && address.equals(mac)) {
