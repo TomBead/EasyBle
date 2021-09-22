@@ -9,6 +9,8 @@ import java.util.HashMap;
 /**
  * 管理数据分发，
  * 可能多个界面用同一个返回的数据，所以要多个监听都能收到
+ * 本来只打算要一个回调，但是发现activity。stop 在activity.resun之后，
+ * 会导致添加的会被置为空，空指针，所以需要这个来避免空
  */
 class BleConnectCallBackManger {
     private String TAG = "BleConnectCallBackManger";
